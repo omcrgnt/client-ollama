@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"sync"
 	"testing"
 
 	clienthttp "github.com/omcrgnt/client-http"
@@ -90,7 +89,7 @@ func newWiredClient(t *testing.T, srv *httptest.Server) *clientollama.Client {
 
 	c := &clientollama.Client{}
 	c.Inject([]any{httpClient})
-	if err := c.Start(context.Background()); err != nil {
+	if err := c.StandBy(); err != nil {
 		t.Fatal(err)
 	}
 	return c
@@ -235,9 +234,9 @@ func TestClient_Generate(t *testing.T) {
 }
 
 func TestClient_notStarted(t *testing.T) {
-	// Inject alone (no Start) must leave the client in a state that returns
-	// errors, not panics — this is the state a concurrently-running Start
-	// on another goroutine, or a misuse outside app.Bootstrap, would see.
+	// Inject alone (no StandBy) must leave the client in a state that
+	// returns errors, not panics — e.g. a business method called directly
+	// in a test, bypassing app.Bootstrap entirely.
 	f := &fakeOllama{embedResp: &embedResponse{Model: "m", Embeddings: [][]float32{{0.1}}}}
 	srv := httptest.NewServer(f.handler())
 	t.Cleanup(srv.Close)
@@ -259,23 +258,23 @@ func TestClient_notStarted(t *testing.T) {
 	t.Cleanup(func() { _ = httpClient.Close(context.Background()) })
 
 	c := &clientollama.Client{}
-	c.Inject([]any{httpClient}) // no Start
+	c.Inject([]any{httpClient}) // no StandBy
 
 	if _, err := c.Embed(t.Context(), "m", "hello"); err == nil {
-		t.Fatal("expected Embed to error before Start")
+		t.Fatal("expected Embed to error before StandBy")
 	}
 	if _, err := c.Generate(t.Context(), "m", "hello", nil); err == nil {
-		t.Fatal("expected Generate to error before Start")
+		t.Fatal("expected Generate to error before StandBy")
 	}
 	if err := c.ProbeReady(t.Context()); err == nil {
-		t.Fatal("expected ProbeReady to error before Start")
+		t.Fatal("expected ProbeReady to error before StandBy")
 	}
 }
 
-func TestClient_Start_malformedBaseURL(t *testing.T) {
+func TestClient_StandBy_malformedBaseURL(t *testing.T) {
 	// Bypasses ecfg entirely, same as newWiredClient does for every other
 	// test — Config.Build only rejects an empty string, not a malformed one
-	// (see Start's doc comment). This exercises Start's url.Parse error
+	// (see StandBy's doc comment). This exercises StandBy's url.Parse error
 	// branch directly.
 	httpBuilt, err := (&clienthttp.Config{
 		Label:   commonv1.Label{Value: "ollama"},
@@ -297,51 +296,9 @@ func TestClient_Start_malformedBaseURL(t *testing.T) {
 	c := &clientollama.Client{}
 	c.Inject([]any{httpClient})
 
-	if err := c.Start(context.Background()); err == nil {
-		t.Fatal("expected Start to reject a malformed BaseURL")
+	if err := c.StandBy(); err == nil {
+		t.Fatal("expected StandBy to reject a malformed BaseURL")
 	}
-}
-
-func TestClient_StartRaceWithProbeReady(t *testing.T) {
-	// Regression: runner.Runner.Run starts every Starter concurrently.
-	// A readiness endpoint (itself a separate Starter, on its own goroutine)
-	// can call ProbeReady on this Client before this Client's own Start has
-	// returned. Must never race or panic — either a clean result or a
-	// "not started" error is acceptable, depending on scheduling.
-	f := &fakeOllama{}
-	srv := httptest.NewServer(f.handler())
-	t.Cleanup(srv.Close)
-
-	reg := prometheus.NewRegistry()
-	metrics := &clienthttp.HTTPClientMetrics{}
-	if err := metrics.RegisterMetrics(reg); err != nil {
-		t.Fatal(err)
-	}
-	httpBuilt, err := (&clienthttp.Config{
-		Label:   commonv1.Label{Value: "ollama"},
-		BaseURL: httpv1.URL{Value: srv.URL},
-	}).Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	httpClient := httpBuilt.(*clienthttp.Client)
-	httpClient.Inject([]any{metrics})
-	t.Cleanup(func() { _ = httpClient.Close(context.Background()) })
-
-	c := &clientollama.Client{}
-	c.Inject([]any{httpClient})
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		_ = c.Start(context.Background())
-	}()
-	go func() {
-		defer wg.Done()
-		_ = c.ProbeReady(context.Background()) // result ignored: either outcome is valid
-	}()
-	wg.Wait()
 }
 
 func TestClient_ProbeReady(t *testing.T) {

@@ -32,21 +32,22 @@ same slot, same env vars (`OLLAMA_LABEL`, `OLLAMA_BASE_URL`) as any other
 
 | Hook | Role |
 |------|------|
-| `NewResource` | Zero `*Client`; `Inject`/`Start` fill it in |
+| `NewResource` | Zero `*Client`; `Inject`/`StandBy` fill it in |
 | `Deps` / `Inject` | Store the `*clienthttp.Client` pointer only — no computation here |
-| `Start` | Build the Ollama SDK client from `HTTPClient()` + `BaseURL()` |
+| `StandBy` | Build the Ollama SDK client from `HTTPClient()` + `BaseURL()` |
 | `ProbeReady` | `Heartbeat` (`HEAD /`) — cheap, side-effect-free reachability check |
 
 `Inject` deliberately does nothing but store the pointer: `sdi.Resolve` runs
 `Inject` across every resource in one pass ordered by registration, not by
 the `Deps()` graph, so `client-http.Client`'s own `Inject` isn't guaranteed
-to have run yet. `Start` runs later, guaranteed after every `Inject` has
-completed — see the lifecycle safety rule in `github.com/omcrgnt/app`'s
-package doc. Building the SDK client in `Inject` instead would reintroduce
-that ordering race.
+to have run yet. `StandBy` runs later, once `sdi.Resolve` has finished
+entirely (every resource's `Inject` has run) — see the lifecycle safety rule
+in `github.com/omcrgnt/app`'s package doc. Building the SDK client in
+`Inject` instead would reintroduce that ordering race.
 
-No `Close`, no `Config`/`BuildConfig`: nothing here owns a resource or an
-env-configured identity beyond what `client-http` already provides.
+No `Close`, no `Config`/`BuildConfig`, no `runner.Starter`: nothing here owns
+a resource, an env-configured identity, or does I/O — `StandBy` is a
+sequential, zero-I/O hook (see `app.StandBy`'s doc), not a `runner.Starter`.
 
 ## API
 

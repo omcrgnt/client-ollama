@@ -7,7 +7,7 @@ import "context"
 // on client-http itself: readiness is API-specific, and client-http has no
 // idea what "up" means for the API it transports).
 func (c *Client) ProbeReady(ctx context.Context) error {
-	api, err := c.api()
+	api, err := c.apiClient()
 	if err != nil {
 		return err
 	}
