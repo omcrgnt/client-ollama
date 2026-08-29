@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+tasks:
+  test:
+    desc: "Run Go tests via Docker"
+    cmds:
+      - |
+        docker run --rm \
+          -v "{{.USER_WORKING_DIR}}:/workspace" \
+          -w /workspace \
+          -e GOCACHE=/tmp/go-cache \
+          -e GOPATH=/tmp/go-path \
+          --user $(id -u):$(id -g) \
+          golang:1.26.5-alpine \
+          go test -v ./...
+
+  test-local:
+    desc: "Run Go tests on host"
+    cmds:
+      - GOWORK=off go test -race -v ./...
