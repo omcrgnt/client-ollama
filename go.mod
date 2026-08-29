@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/ollama/ollama v0.33.1
-	github.com/omcrgnt/app v0.21.2
+	github.com/omcrgnt/app v0.23.0
 	github.com/omcrgnt/client-http v0.1.0
 	github.com/omcrgnt/ecfg v0.21.2
 	github.com/omcrgnt/proto/gen/go v0.4.0
@@ -28,7 +28,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/omcrgnt/runner v0.21.0 // indirect
+	github.com/omcrgnt/runner v0.23.0 // indirect
 	github.com/omcrgnt/sdi v0.21.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect

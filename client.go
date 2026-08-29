@@ -58,6 +58,12 @@ func (c *Client) Inject(args []any) {
 // See TestMarkClientHTTPLoadEnvRejectsMalformedBaseURL, which pins the
 // ecfg.LoadEnv side of this assumption, and TestClient_StandBy_malformedBaseURL,
 // which exercises this error branch directly via that same bypass.
+//
+// No nil-guard on c.http here (unlike apiClient's): Deps declares it as a
+// single required dependency, so sdi.Resolve errors out before Bootstrap's
+// StandBy loop is ever reached if it's missing — StandBy is only called by
+// that same trusted pipeline, not by arbitrary callers the way the business
+// methods below are.
 func (c *Client) StandBy() error {
 	base, err := url.Parse(c.http.BaseURL())
 	if err != nil {
