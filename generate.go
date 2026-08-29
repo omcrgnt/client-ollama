@@ -13,7 +13,7 @@ import (
 // "format" field: pass json.RawMessage(`"json"`) for unstructured-but-valid
 // JSON, a JSON Schema object for strict structure, or nil for plain text.
 func (c *Client) Generate(ctx context.Context, model, prompt string, schema json.RawMessage) (string, error) {
-	api, err := c.api()
+	api, err := c.apiClient()
 	if err != nil {
 		return "", err
 	}

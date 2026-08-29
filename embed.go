@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Client) Embed(ctx context.Context, model, text string) ([]float32, error) {
-	api, err := c.api()
+	api, err := c.apiClient()
 	if err != nil {
 		return nil, err
 	}

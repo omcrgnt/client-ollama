@@ -1,10 +1,8 @@
 package clientollama
 
 import (
-	"context"
 	"fmt"
 	"net/url"
-	"sync/atomic"
 
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/omcrgnt/app"
@@ -18,11 +16,12 @@ import (
 //
 // Catalog field: *Client (ResourceFactory).
 type Client struct {
-	http   *clienthttp.Client
-	apiPtr atomic.Pointer[ollamaapi.Client]
+	http *clienthttp.Client
+	api  *ollamaapi.Client
 }
 
 var _ app.ResourceFactory = (*Client)(nil)
+var _ app.StandBy = (*Client)(nil)
 
 func (*Client) NewResource() (any, error) { return &Client{}, nil }
 
@@ -33,9 +32,9 @@ func (*Client) Deps() []any { return []any{(*clienthttp.Client)(nil)} }
 // Deps() graph — a ResourceFactory (this type) is always registered before
 // any Configurable (client-http.Client) materializes, regardless of catalog
 // field order. Reading dep.HTTPClient() here would observe it before
-// client-http.Client's own Inject has set it. Start runs later, guaranteed
-// after every Inject has completed (via runner.Runner), which is where
-// dep's state is safe to consume.
+// client-http.Client's own Inject has set it. StandBy runs later, once
+// sdi.Resolve has finished entirely (every resource's Inject has run),
+// which is where dep's state is safe to consume.
 func (c *Client) Inject(args []any) {
 	for _, arg := range args {
 		if dep, ok := arg.(*clienthttp.Client); ok {
@@ -44,7 +43,10 @@ func (c *Client) Inject(args []any) {
 	}
 }
 
-// Start builds the Ollama SDK client from the now fully-wired client-http.Client.
+// StandBy builds the Ollama SDK client from the now fully-wired client-http.Client.
+// It runs once, sequentially, after sdi.Resolve and before runner.Run starts
+// the concurrent Start phase — no I/O happens here, so there is no ordering
+// hazard to guard against the way there would be for a runner.Starter.
 //
 // The url.Parse error below is not expected to trigger when this Client was
 // wired through app.Bootstrap's normal pipeline: ecfg.LoadEnv validates
@@ -54,28 +56,25 @@ func (c *Client) Inject(args []any) {
 // Config.Build itself only rejects an empty string, so anything calling
 // Build directly (as this package's own tests do) bypasses ecfg entirely.
 // See TestMarkClientHTTPLoadEnvRejectsMalformedBaseURL, which pins the
-// ecfg.LoadEnv side of this assumption, and TestClient_Start_malformedBaseURL,
+// ecfg.LoadEnv side of this assumption, and TestClient_StandBy_malformedBaseURL,
 // which exercises this error branch directly via that same bypass.
-func (c *Client) Start(context.Context) error {
+func (c *Client) StandBy() error {
 	base, err := url.Parse(c.http.BaseURL())
 	if err != nil {
 		return fmt.Errorf("clientollama: parse base URL: %w", err)
 	}
-	c.apiPtr.Store(ollamaapi.NewClient(base, c.http.HTTPClient()))
+	c.api = ollamaapi.NewClient(base, c.http.HTTPClient())
 	return nil
 }
 
-// api returns the SDK client built by Start, or an error if Start hasn't
-// completed yet — reachable in practice, not just in theory:
-// runner.Runner.Run starts every Starter concurrently, so a readiness probe
-// on this same Client can run on another goroutine before this Client's own
-// Start has returned.
-func (c *Client) api() (*ollamaapi.Client, error) {
-	api := c.apiPtr.Load()
-	if api == nil {
+// apiClient returns the SDK client built by StandBy, or an error if StandBy
+// hasn't run yet — e.g. this Client's business methods called directly in a
+// test, bypassing app.Bootstrap.
+func (c *Client) apiClient() (*ollamaapi.Client, error) {
+	if c.api == nil {
 		return nil, fmt.Errorf("clientollama: not started")
 	}
-	return api, nil
+	return c.api, nil
 }
 
 // packageError wraps a passthrough error from the Ollama SDK with this

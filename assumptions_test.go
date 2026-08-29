@@ -9,13 +9,13 @@ import (
 )
 
 // TestMarkClientHTTPLoadEnvRejectsMalformedBaseURL is a canary pinning one
-// half of an assumption Client.Start's doc comment relies on: when this
+// half of an assumption Client.StandBy's doc comment relies on: when this
 // Client is wired the normal way (through app.Bootstrap), ecfg.LoadEnv
 // rejects a malformed BaseURL via protovalidate before Config.Build ever
 // runs. The other half — that this Client is NOT wired the normal way in
 // this package's own tests, so the error branch is directly reachable and
-// separately covered by TestClient_Start_malformedBaseURL — needs no canary,
-// it's exercised directly.
+// separately covered by TestClient_StandBy_malformedBaseURL — needs no
+// canary, it's exercised directly.
 //
 // The value below is deliberately not something a naive "no spaces/control
 // chars" sanitizer would catch (an invalid port, not a stray character) —
@@ -38,6 +38,6 @@ func TestMarkClientHTTPLoadEnvRejectsMalformedBaseURL(t *testing.T) {
 
 	if err := ecfg.LoadEnv(reg); err == nil {
 		t.Fatal("expected ecfg.LoadEnv to reject a malformed BaseURL; " +
-			"clientollama.Client.Start's url.Parse branch may now be reachable")
+			"clientollama.Client.StandBy's url.Parse branch may now be reachable")
 	}
 }
