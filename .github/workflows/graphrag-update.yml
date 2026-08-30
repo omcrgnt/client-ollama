@@ -1,0 +1,31 @@
+name: Update GraphRAG Database
+
+# 1. Триггер: запускать только при пуше (мердже) в ветку main
+on:
+  push:
+    branches:
+      - main
+    # Опционально: раскомментируй строки ниже, если хочешь запускать 
+    # обновление ТОЛЬКО когда меняются файлы в папке с документами input
+    # paths:
+    #   - 'input/**' 
+
+jobs:
+  update-graph:
+    # 2. Указываем GitHub слать задачу на твой локальный Ubuntu-сервер
+    runs-on: self-hosted 
+
+    steps:
+      # Шаг А: Раннер скачивает свежий код из main в свою рабочую папку на сервере
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Шаг Б: Запуск обновления базы GraphRAG
+      - name: Run GraphRAG Update
+        run: |
+          # ВНИМАНИЕ: Если ты используешь виртуальное окружение (venv), 
+          # раскомментируй и укажи правильный путь к нему, например:
+          # source /home/user/projects/my_project/.venv/bin/activate
+          
+          # Запуск инкрементального обновления GraphRAG
+          echo "done" > /tmp/tratata

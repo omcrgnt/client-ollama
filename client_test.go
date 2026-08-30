@@ -89,8 +89,12 @@ func newWiredClient(t *testing.T, srv *httptest.Server) *clientollama.Client {
 
 	c := &clientollama.Client{}
 	c.Inject([]any{httpClient})
-	if err := c.StandBy(); err != nil {
+	cleanup, err := c.StandBy()
+	if err != nil {
 		t.Fatal(err)
+	}
+	if cleanup != nil {
+		t.Fatal("StandBy returned a non-nil cleanup: Client owns no separate resource to release, only a wrapper around the already-owned *http.Client — a future change that starts returning one here should update runner.StandBy's and this package's docs too, not slip through silently")
 	}
 	return c
 }
@@ -296,7 +300,7 @@ func TestClient_StandBy_malformedBaseURL(t *testing.T) {
 	c := &clientollama.Client{}
 	c.Inject([]any{httpClient})
 
-	if err := c.StandBy(); err == nil {
+	if _, err := c.StandBy(); err == nil {
 		t.Fatal("expected StandBy to reject a malformed BaseURL")
 	}
 }
