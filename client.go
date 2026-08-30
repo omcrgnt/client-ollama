@@ -1,12 +1,14 @@
 package clientollama
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/omcrgnt/app"
 	clienthttp "github.com/omcrgnt/client-http"
+	"github.com/omcrgnt/runner"
 )
 
 // Client is a typed Ollama API client (Embed/Generate/Heartbeat) over an
@@ -21,7 +23,7 @@ type Client struct {
 }
 
 var _ app.ResourceFactory = (*Client)(nil)
-var _ app.StandBy = (*Client)(nil)
+var _ runner.StandBy = (*Client)(nil)
 
 func (*Client) NewResource() (any, error) { return &Client{}, nil }
 
@@ -46,7 +48,10 @@ func (c *Client) Inject(args []any) {
 // StandBy builds the Ollama SDK client from the now fully-wired client-http.Client.
 // It runs once, sequentially, after sdi.Resolve and before runner.Run starts
 // the concurrent Start phase — no I/O happens here, so there is no ordering
-// hazard to guard against the way there would be for a runner.Starter.
+// hazard to guard against the way there would be for a runner.Starter. It
+// always returns a nil cleanup: Client owns no separate resource of its own
+// to release, only a wrapper around the already-owned *http.Client behind
+// clienthttp.Client (which has its own, unrelated lifecycle).
 //
 // The url.Parse error below is not expected to trigger when this Client was
 // wired through app.Bootstrap's normal pipeline: ecfg.LoadEnv validates
@@ -60,17 +65,17 @@ func (c *Client) Inject(args []any) {
 // which exercises this error branch directly via that same bypass.
 //
 // No nil-guard on c.http here (unlike apiClient's): Deps declares it as a
-// single required dependency, so sdi.Resolve errors out before Bootstrap's
-// StandBy loop is ever reached if it's missing — StandBy is only called by
+// single required dependency, so sdi.Resolve errors out before runner.Run's
+// StandBy phase is ever reached if it's missing — StandBy is only called by
 // that same trusted pipeline, not by arbitrary callers the way the business
 // methods below are.
-func (c *Client) StandBy() error {
+func (c *Client) StandBy() (func(context.Context) error, error) {
 	base, err := url.Parse(c.http.BaseURL())
 	if err != nil {
-		return fmt.Errorf("clientollama: parse base URL: %w", err)
+		return nil, fmt.Errorf("clientollama: parse base URL: %w", err)
 	}
 	c.api = ollamaapi.NewClient(base, c.http.HTTPClient())
-	return nil
+	return nil, nil
 }
 
 // apiClient returns the SDK client built by StandBy, or an error if StandBy

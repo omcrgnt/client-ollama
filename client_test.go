@@ -89,7 +89,7 @@ func newWiredClient(t *testing.T, srv *httptest.Server) *clientollama.Client {
 
 	c := &clientollama.Client{}
 	c.Inject([]any{httpClient})
-	if err := c.StandBy(); err != nil {
+	if _, err := c.StandBy(); err != nil {
 		t.Fatal(err)
 	}
 	return c
@@ -296,7 +296,7 @@ func TestClient_StandBy_malformedBaseURL(t *testing.T) {
 	c := &clientollama.Client{}
 	c.Inject([]any{httpClient})
 
-	if err := c.StandBy(); err == nil {
+	if _, err := c.StandBy(); err == nil {
 		t.Fatal("expected StandBy to reject a malformed BaseURL")
 	}
 }

@@ -45,9 +45,12 @@ entirely (every resource's `Inject` has run) — see the lifecycle safety rule
 in `github.com/omcrgnt/app`'s package doc. Building the SDK client in
 `Inject` instead would reintroduce that ordering race.
 
-No `Close`, no `Config`/`BuildConfig`, no `runner.Starter`: nothing here owns
-a resource, an env-configured identity, or does I/O — `StandBy` is a
-sequential, zero-I/O hook (see `app.StandBy`'s doc), not a `runner.Starter`.
+No `Config`/`BuildConfig`, no `runner.Starter`: nothing here owns an
+env-configured identity or does I/O — `StandBy` is a sequential, zero-I/O
+hook (see `runner.StandBy`'s doc), not a `runner.Starter`. `StandBy` returns
+a nil cleanup — no `Close` either — since `Client` owns no separate resource
+of its own to release, only a wrapper around the already-owned `*http.Client`
+behind `clienthttp.Client`.
 
 ## API
 
