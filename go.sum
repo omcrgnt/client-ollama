@@ -42,10 +42,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/ollama/ollama v0.33.1 h1:nEeqiZzqlO+RfjJ7AvfUgrYlV/wbrxPl2szRg9mtxPU=
 github.com/ollama/ollama v0.33.1/go.mod h1:Kekx/+OtFZHmqbkVH/QUUDVcMQS+1pg1dcz4Qy7TGn4=
-github.com/omcrgnt/app v0.21.2 h1:gBu855bNsNX6qQxHufNY/2ayfsg8J3FCYW9WjYxo+xk=
-github.com/omcrgnt/app v0.21.2/go.mod h1:tddwLAPOr+HYKQAvkVIRY94Xwi/y5jHy+QxJuzdr2ZA=
-github.com/omcrgnt/app v0.23.0 h1:yiImqgp6hV3DviFTTWD75fZi5A+nm8PXgr9GYMsqGZw=
-github.com/omcrgnt/app v0.23.0/go.mod h1:lnerfcMOJNbg+icUu2uqJ5qOuJkPVxf76CW27U2M8Zw=
+github.com/omcrgnt/app v0.24.0 h1:Ht3vN6lBg8HsSmb89td8Sqcp0x/RBVv80eLsdY+ZFiU=
+github.com/omcrgnt/app v0.24.0/go.mod h1:lnerfcMOJNbg+icUu2uqJ5qOuJkPVxf76CW27U2M8Zw=
 github.com/omcrgnt/client-http v0.1.0 h1:NdPCBgjhCCXPWy8ld4hgqAL7o5mS9vllY3bpTBxaz3c=
 github.com/omcrgnt/client-http v0.1.0/go.mod h1:G9IFqPTzXOw8hkrYT0EKUm9HHtxu4O7dOLsd8ImC6ds=
 github.com/omcrgnt/ecfg v0.21.2 h1:c8mB2DiGl6J6kaRUlxVmzj2iHGZUJvqJyWUUIjd6xdA=
@@ -54,10 +52,8 @@ github.com/omcrgnt/proto/gen/go v0.4.0 h1:EKqdmPCZcAotdvHGYYHJwyufMsrRZguKoTj9Yh
 github.com/omcrgnt/proto/gen/go v0.4.0/go.mod h1:i1yI+8vZ6lZjbZhvEqB9n0XjZa4DGMcinJ0XQ7Z8/T8=
 github.com/omcrgnt/res v0.22.0 h1:OCtaKOvcZq2johftmw6ZcfY9k5rmyfVOyHFeRTv0kOU=
 github.com/omcrgnt/res v0.22.0/go.mod h1:mYMNfATQOqfJ+jOBPY/eZoKWlnmfSggkQCmX5xkt2Fc=
-github.com/omcrgnt/runner v0.21.0 h1:2pjkrUVxsSKRs/G2TEa0cX0wE6LHt8PzjyQ22xseKac=
-github.com/omcrgnt/runner v0.21.0/go.mod h1:X18rRVW3V/dIEU7wrpsEveCp1RkyeDNvMsYdus/1uCA=
-github.com/omcrgnt/runner v0.23.0 h1:xekL2lkRGp1oPv3Oqu9mKqcbv9rnPjVZsM+K1ogtjaQ=
-github.com/omcrgnt/runner v0.23.0/go.mod h1:X18rRVW3V/dIEU7wrpsEveCp1RkyeDNvMsYdus/1uCA=
+github.com/omcrgnt/runner v0.24.0 h1:+A68Ozw1CGwCQQMJjoTDQirMHOPO9QX3IeX2Qi4oZys=
+github.com/omcrgnt/runner v0.24.0/go.mod h1:X18rRVW3V/dIEU7wrpsEveCp1RkyeDNvMsYdus/1uCA=
 github.com/omcrgnt/sdi v0.21.0 h1:Gp0DWb+X9A/uHDf0PieHAyKEvgdIoDTgc/KotdHvyhs=
 github.com/omcrgnt/sdi v0.21.0/go.mod h1:adV8pjy+VADDebhyE5Y01dt+NZf4xPoBPqNvPqPQBn0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

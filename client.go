@@ -49,9 +49,8 @@ func (c *Client) Inject(args []any) {
 // It runs once, sequentially, after sdi.Resolve and before runner.Run starts
 // the concurrent Start phase — no I/O happens here, so there is no ordering
 // hazard to guard against the way there would be for a runner.Starter. It
-// always returns a nil cleanup: Client owns no separate resource of its own
-// to release, only a wrapper around the already-owned *http.Client behind
-// clienthttp.Client (which has its own, unrelated lifecycle).
+// always returns a nil cleanup — see [runner.StandBy]'s doc comment, which
+// names this exact type as the example of a StandBy with nothing to undo.
 //
 // The url.Parse error below is not expected to trigger when this Client was
 // wired through app.Bootstrap's normal pipeline: ecfg.LoadEnv validates
