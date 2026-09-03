@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/ollama/ollama v0.33.1
-	github.com/omcrgnt/app v0.24.0
+	github.com/omcrgnt/app v0.24.1
 	github.com/omcrgnt/client-http v0.1.0
 	github.com/omcrgnt/ecfg v0.21.2
 	github.com/omcrgnt/proto/gen/go v0.4.0
